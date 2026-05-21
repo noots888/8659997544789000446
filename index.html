@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com 'unsafe-inline'; style-src 'self' https://unpkg.com 'unsafe-inline'; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://tile.openstreetmap.org https://server.arcgisonline.com https://services.arcgisonline.com https://*.arcgisonline.com https://mt0.google.com https://mt1.google.com https://mt2.google.com https://mt3.google.com https://*.google.com https://*.basemaps.cartocdn.com https://*.tile.opentopomap.org https://*.tile.openstreetmap.fr; connect-src 'self' https://overpass-api.de https://lz4.overpass-api.de https://z.overpass-api.de https://overpass.kumi.systems https://overpass.osm.ch https://overpass.openstreetmap.ru; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
+
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" name="viewport"/>
+<title>Field MAP</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta content="#122418" name="theme-color"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Field MAP"/>
+<meta name="application-name" content="Field MAP"/>
+<meta name="msapplication-TileColor" content="#122418"/>
+<link rel="apple-touch-icon" href="icon-v389-192.png"/>
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+<link href="css/app.css?v=4.1.9" rel="stylesheet"/>
+</head>
+<body>
+<div id="map"></div>
+<div class="stats-strip">
+<div class="stat"><svg fill="none" viewbox="0 0 24 24"><path d="M3 18 8 9l4 5 3-4 6 8H3Z" stroke="currentColor" stroke-linejoin="round" stroke-width="2.2"></path></svg><b id="kAssets">0</b><span>Assets</span></div>
+<div class="stat"><svg fill="none" viewbox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.4"></path></svg><b id="kIndexed">0</b><span>Indexed</span></div>
+<div class="stat"><svg fill="none" viewbox="0 0 24 24"><path d="m13 2-8 12h6l-1 8 9-13h-6l0-7Z" fill="currentColor"></path></svg><b id="kCond">0</b><span>Info</span></div>
+<div class="stat"><svg fill="none" viewbox="0 0 24 24"><circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="2.2"></circle><circle cx="12" cy="12" fill="currentColor" r="2.2"></circle></svg><b id="kResults">0</b><span>Results</span></div>
+</div>
+<div class="compass"><b>N</b></div>
+<div class="side-tools">
+<button onclick="locateMe()" aria-label="My GPS">
+<svg fill="none" viewbox="0 0 24 24"><circle cx="12" cy="12" r="6.5" stroke="white" stroke-width="2.4"></circle><circle cx="12" cy="12" fill="white" r="2.2"></circle><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" stroke="white" stroke-linecap="round" stroke-width="2.4"></path></svg>
+</button>
+<button onclick="openMapLayerSheet()" aria-label="Map layers">
+<svg fill="none" viewbox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z" stroke="white" stroke-linejoin="round" stroke-width="2.2"></path><path d="m3 13 9 5 9-5M3 17l9 5 9-5" stroke="white" stroke-linejoin="round" stroke-width="2.2"></path></svg>
+</button>
+<button onclick="zoomToDefaultMap()" aria-label="Default map view">
+<svg fill="none" viewbox="0 0 24 24"><path d="m20 4-7.5 16-2-7-6.5-2 16-7Z" fill="white"></path></svg>
+</button>
+</div>
+<button class="fab" id="toolsFab" aria-label="Tools" onclick="togglePlus()"><svg fill="none" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="white" stroke-linecap="round" stroke-width="2.8"></path></svg></button>
+<div class="plus-sheet" id="plusSheet">
+<div class="plus-title">+ Map Tools</div>
+<div class="plus-grid">
+<button class="brown tool-btn" data-tool="measure" onclick="toggleMeasureTool();closePlus()">
+<svg fill="none" viewbox="0 0 24 24"><path d="m4 17 13-13 3 3L7 20l-3-3Z" stroke="white" stroke-linejoin="round" stroke-width="2.2"></path><path d="m8 13 2 2M11 10l2 2M14 7l2 2" stroke="white" stroke-width="1.7"></path></svg>
+      Measure
+    </button>
+<button class="brown tool-btn" data-tool="multi" onclick="toggleMultiMeasureTool();closePlus()">
+<svg fill="none" viewbox="0 0 24 24"><path d="M5 18c4-8 10 0 14-8" stroke="white" stroke-linecap="round" stroke-width="2.2"></path><circle cx="5" cy="18" fill="white" r="2"></circle><circle cx="12" cy="14" fill="white" r="2"></circle><circle cx="19" cy="10" fill="white" r="2"></circle></svg>
+      Multi
+    </button>
+
+<button class="green tool-btn" data-tool="radius" onclick="toggleRadiusLines();closePlus()">
+<svg fill="none" viewbox="0 0 24 24"><circle cx="12" cy="12" r="7" stroke="white" stroke-width="2.2"></circle><circle cx="12" cy="12" fill="white" r="2"></circle><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" stroke="white" stroke-linecap="round" stroke-width="2"></path></svg>
+      3 km
+    </button>
+<button class="sun tool-btn" data-tool="poi" onclick="openPOIAtGPS();closePlus()">
+<svg fill="none" viewbox="0 0 24 24"><path d="M12 22s7-7 7-13a7 7 0 1 0-14 0c0 6 7 13 7 13Z" stroke="white" stroke-width="2.2"></path><circle cx="12" cy="9" fill="white" r="2.5"></circle></svg>
+      POI
+    </button>
+<button class="teal tool-btn" data-tool="breadcrumb" onclick="toggleBreadcrumbs();closePlus()">
+<svg fill="none" viewbox="0 0 24 24"><path d="M5 18c4-8 10 0 14-8" stroke="white" stroke-dasharray="2 3" stroke-linecap="round" stroke-width="2.2"></path><circle cx="5" cy="18" fill="white" r="2.2"></circle><circle cx="12" cy="14" fill="white" r="2.2"></circle><circle cx="19" cy="10" fill="white" r="2.2"></circle></svg>
+      Breadcrumb
+    </button>
+<button class="purple tool-btn" data-tool="patrol" onclick="togglePatrolOverlayFromMenu(event)">
+<svg fill="none" viewbox="0 0 24 24">
+<path d="M4 17h16" stroke="white" stroke-linecap="round" stroke-width="2.1"></path>
+<path d="M6 17l3-8h6l3 8" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1"></path>
+<circle cx="8" cy="18" r="1.8" stroke="white" stroke-width="1.8"></circle><circle cx="16" cy="18" r="1.8" stroke="white" stroke-width="1.8"></circle>
+<path d="M3 8h7l2-3h3l-1.5 3H20" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+  Patrol
+</button>
+</div>
+</div>
+<div class="drawer" id="drawer">
+<div class="grip"></div>
+<div class="dhead">
+<div class="dtitle"><div class="dicon"><svg fill="none" viewbox="0 0 24 24"><path d="M3 18 8 9l4 5 3-4 6 8H3Z" fill="#6f8f3a" stroke="#1f3522" stroke-width="1.6"></path><path d="M15 6h4l-1.4-1.5L19 3h-4v7" stroke="#b8622d" stroke-linecap="round" stroke-width="1.7"></path></svg></div><div><b id="dTitle">Panel</b><span id="dSub">Unique menu</span></div></div>
+<button class="close" onclick="closeDrawer()" aria-label="Close panel"></button>
+</div>
+<div class="body" id="body"></div>
+</div>
+<div class="full-page" id="settingsPage">
+<div class="full-head settings-main-head"><button class="settings-back" id="settingsBackBtn" onclick="closeSettingsSection()" type="button">‹ Settings</button><b id="settingsTitle">Settings</b><button class="settings-close" onclick="toggleSettings()" type="button">×</button></div>
+<div class="full-body settings-body">
+<div class="settings-home" id="settingsHome">
+<button class="settings-card" onclick="openSettingsSection('save')" type="button"><span><b>Save location</b><small>Choose the folder used for app saves and tests.</small></span><em>›</em></button>
+<button class="settings-card" onclick="openSettingsSection('import')" type="button"><span><b>Import Data</b><small>Import CSV/JSON/TXT files, test imports, and auto-index.</small></span><em>›</em></button>
+<button class="settings-card" onclick="openSettingsSection('toolLayout')" type="button"><span><b>Map Controls Layout</b><small>Choose the 8 buttons shown in Map Controls. Others stay in Map Tools.</small></span><em>›</em></button>
+<button class="settings-card" onclick="openSettingsSection('production')" type="button"><span><b>Diagnostics & Recovery</b><small>Health check, Safe Mode, Hard Refresh, final import validation, and Export Everything.</small></span><em>›</em></button>
+<button class="settings-card" onclick="openSettingsSection('security')" type="button"><span><b>Security</b><small>PIN lock, biometric unlock, and auto-lock settings.</small></span><em>›</em></button>
+<button class="settings-card" onclick="openSettingsSection('storage')" type="button"><span><b>Storage</b><small>Records, index count, GPS assets, backups, and clear data.</small></span><em>›</em></button>
+<button class="settings-card" onclick="openSettingsSection('corrections')" type="button"><span><b>Estimate corrections</b><small>Back up, import, or bake moved estimate dots into a corrected JSON.</small></span><em>›</em></button>
+</div>
+<div class="settings-section-page" id="settingsSectionSave">
+<div class="block"><h3>Save location</h3><div class="help">Choose a destination folder. The app creates/uses <b>Field Map</b> where browser support allows it.</div><div class="actions"><button class="green" onclick="chooseSaveFolder()">Choose Folder</button><button class="secondary" onclick="testSaveFile()">Test Save</button></div></div>
+</div>
+<div class="settings-section-page" id="settingsSectionImport">
+<div class="block"><h3>Import Data</h3><input accept=".csv,.json,.txt" id="settingsFileInput" multiple="" onchange="queueImportFilesFrom('settingsFileInput')" type="file"/>
+<div class="import-mode-box" id="importModeBox"><div class="import-mode-title">Import mode</div><div class="import-mode-buttons"><button type="button" id="importModeReplace" onclick="setImportMode('replace')">Replace all</button><button type="button" id="importModeAppend" onclick="setImportMode('append')">Append only</button></div><small>Use Replace all for a clean re-import. Append only keeps existing saved records and skips duplicates.</small></div>
+<div id="importQueueList" class="import-queue-list"></div>
+<div class="actions import-actions"><button class="secondary" onclick="queueImportFilesFrom('settingsFileInput')">Add selected</button><button class="green" onclick="loadFilesFrom('settingsFileInput')">Import queued</button><button class="secondary" onclick="loadFilesFrom('settingsFileInput',{samplePercent:10})">Test queued 10%</button><button class="secondary" onclick="clearImportQueue()">Clear queue</button><button class="secondary" id="autoIndexBtn" onclick="toggleAutoIndex()">Auto Index: On</button><button class="secondary" onclick="exportBackup()">Export</button></div>
+<div id="importAudit" class="import-audit"></div>
+<div class="help import-help">You can select files more than once. Each selection is added to the queue, then imported together.</div></div>
+</div>
+<div class="settings-section-page" id="settingsSectionToolLayout">
+<div class="block"><h3>Map Controls Layout</h3><div id="toolLayoutSettings"></div></div>
+</div>
+<div class="settings-section-page" id="settingsSectionProduction">
+<div class="block production-settings-block"><h3>Diagnostics & Recovery</h3><div class="help">Production health check, recovery tools and final backup before live use.</div><div id="productionSettings"></div></div>
+</div>
+<div class="settings-section-page" id="settingsSectionSecurity">
+<div class="block"><h3>Security</h3><div class="help">Local PIN lock, optional biometric unlock, auto-lock settings, and outbound network protection.</div><div id="pinLockSettings"></div><div id="securityAuditSettings"></div></div>
+</div>
+<div class="settings-section-page" id="settingsSectionStorage">
+<div class="block"><h3>Storage</h3><div id="settingsStats"></div><div class="actions"><button class="green" onclick="openRawInspector()">Raw Data Inspector</button><button class="secondary" onclick="exportBackup()">Export Backup</button><button class="redbtn" onclick="clearData()">Clear Data</button></div></div>
+</div>
+<div class="settings-section-page" id="settingsSectionCorrections">
+<div class="block correction-settings-block"><h3>Estimate corrections</h3><div class="help">Manual moved/hidden estimate dots are stored locally. Export them before clearing app storage. Create corrected JSON to share a self-contained copy with corrected coordinates baked in.</div><div id="correctionStats" class="correction-stats"></div><input accept=".json,application/json,text/plain" id="estimateCorrectionFileInput" type="file" onchange="importEstimateCorrectionsFromInput(window.__estimateCorrectionPendingMode||'merge')"/><div class="actions correction-actions"><button class="green" onclick="exportEstimateCorrections()">Export corrections</button><button class="secondary" onclick="openEstimateCorrectionImporter('merge')">Import / merge corrections</button><button class="secondary" onclick="openEstimateCorrectionImporter('replace')">Import / replace corrections</button><button class="green" onclick="closeSettings();openEstimateReviewSheet()">Auto correction</button><button class="clay" onclick="createCorrectedAssetJSON()">Create corrected JSON</button><button class="redbtn" onclick="clearEstimateCorrections()">Clear corrections</button></div><div class="help"><b>Export corrections</b> shares only moved/hidden estimate-dot settings. <b>Create corrected JSON</b> exports all imported records with corrected GPS fields added, plus manual virtual estimates as tagged records.</div></div>
+</div>
+</div>
+</div>
+
+<div class="full-page asset-index-page" id="assetIndexPage">
+  <div class="asset-index-head">
+    <button class="asset-index-back" onclick="closeAssetIndex()" type="button">‹ Map</button>
+    <div class="asset-index-title"><b>Field MAP Index</b><span>Search first. Map stays unloaded until Show on map.</span></div>
+    <button class="asset-index-close" onclick="closeAssetIndex()" type="button">×</button>
+  </div>
+  <div class="full-body asset-index-body" id="assetIndexBody"></div>
+</div>
+<div class="full-page raw-inspector-page" id="rawInspectorPage">
+  <div class="asset-index-head raw-inspector-head">
+    <button class="asset-index-back" onclick="closeRawInspector()" type="button">‹ Settings</button>
+    <div class="asset-index-title"><b>Raw Data Inspector</b><span>Shows accepted, hidden, skipped, no GPS, and map-loadable records.</span></div>
+    <button class="asset-index-close" onclick="closeRawInspector()" type="button">×</button>
+  </div>
+  <div class="full-body raw-inspector-body" id="rawInspectorBody"></div>
+</div>
+<div class="full-page" id="poiPage">
+<div class="full-head"><b>Create POI</b></div>
+<div class="full-body"><div class="block"><div id="poiGpsStatus" class="poi-gps-status">Using current GPS marker...</div><select id="poiType"><option>Access issue</option><option>Customer issue</option><option>Vegetation</option><option>Asset defect</option><option>Safety hazard</option><option>Locked gate</option><option>Track condition</option><option>Environmental issue</option><option>Other</option></select><div style="height:8px"></div><textarea id="poiNote" placeholder="Leave note..."></textarea><div class="actions"><button class="green" onclick="savePOI()">Save POI</button><button class="secondary" onclick="closePOI()">Cancel</button></div></div></div>
+</div>
+<div class="heli-overlay" id="heliPage">
+  <div class="heli-drag" id="heliDragHandle">
+    <b>Patrol Overlay</b>
+    <div class="heli-head-actions">
+      <button class="heli-collapse" id="heliCollapseBtn" onclick="toggleHeliCompact(event)" title="Collapse / expand">▾</button>
+      <button class="heli-close" onclick="closeHeliPatrol()">×</button>
+    </div>
+  </div>
+  <div class="heli-body">
+    <div class="heli-line-row heli-hide-compact">
+      <input id="heliLine" inputmode="text" placeholder="Enter route(s), comma separated..." onkeydown="if(event.key==='Enter'){event.preventDefault();heliRefreshLine();}" />
+      <button class="sky" onclick="heliRefreshLine()">Load</button>
+    </div>
+    <div class="heli-mini heli-hide-compact" id="heliLineCount">Type route(s), then press Enter or Load</div>
+    <div class="heli-gps heli-hide-compact" id="heliGpsStatus">GPS waiting...</div>
+    <div class="heli-telemetry">
+      <div><span>km/h</span><b id="heliKmh">--</b></div>
+      <div><span>knots</span><b id="heliKnots">--</b></div>
+      <div><span>alt</span><b id="heliAlt">--</b></div>
+      <div><span>head</span><b id="heliHead">--</b></div>
+    </div>
+    <div class="heli-poles">
+      <div><span>Previous asset</span><b id="heliPrevPole">--</b></div>
+      <div><span>Nearest asset</span><b id="heliNearestPole">--</b></div>
+      <div><span>Next asset</span><b id="heliNextPole">--</b></div>
+    </div>
+    <div class="heli-crossing heli-hide-compact" id="heliCrossingWarn">No route crossings detected on loaded data</div>
+    <textarea class="heli-hide-compact" id="heliLocationNote" placeholder="Location note..." rows="2"></textarea>
+    <div class="heli-actions heli-hide-compact">
+      <button class="green" onclick="heliBestGPS()">Best GPS</button>
+      <button class="teal" onclick="toggleBreadcrumbs()">Breadcrumb</button>
+      <button class="sun" onclick="heliNextPole()">Go Next Asset</button>
+      <button class="clay" onclick="heliSaveLocation()">Save Location</button>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+<button id="tabSearch" onclick="openSearch()">
+<svg fill="none" viewbox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.2" stroke="currentColor" stroke-width="2.2"></circle><path d="m15.5 15.5 4.5 4.5" stroke="currentColor" stroke-linecap="round" stroke-width="2.6"></path></svg>
+    Index
+  </button>
+<button id="tabMap" onclick="openMapMenu()">
+<svg fill="none" viewbox="0 0 24 24"><path d="m4 6.5 5-2.2 6 2.2 5-2.2v13.2l-5 2.2-6-2.2-5 2.2V6.5Z" stroke="currentColor" stroke-linejoin="round" stroke-width="2.2"></path></svg>
+    Map
+  </button>
+<button id="tabSettings" onclick="toggleSettings()">
+<svg fill="none" viewbox="0 0 24 24"><path d="M9 7V5.5h6V7M4.5 8.5h15v10h-15v-10Z" stroke="currentColor" stroke-linejoin="round" stroke-width="2.2"></path><path d="M4.5 12h15" stroke="currentColor" stroke-width="2.2"></path><path d="M9 12v1.4h6V12" stroke="currentColor" stroke-linecap="round" stroke-width="2.2"></path></svg>
+    Settings
+  </button>
+</nav>
+<div class="tool-status" id="toolStatus"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/core/security-guard.js?v=4.1.9"></script>
+<script src="js/core/state.js?v=4.1.9"></script>
+<script src="js/modules/map/map-core.js?v=4.1.9"></script>
+<script src="js/modules/map/map-state.js?v=4.1.9"></script>
+<script src="js/core/app-init.js?v=4.1.9"></script>
+<script src="js/modules/storage/export-folder.js?v=4.1.9"></script>
+<script src="js/core/export-helper.js?v=4.1.9"></script>
+<script src="js/ui/drawer.js?v=4.1.9"></script>
+<script src="js/ui/menu-bar.js?v=4.1.9"></script>
+<script src="js/features/search.js?v=4.1.9"></script>
+<script src="js/features/filter-panel.js?v=4.1.9"></script>
+<script src="js/modules/map/map-controls.js?v=4.1.9"></script>
+<script src="js/features/helicopter.js?v=4.1.9"></script>
+<script src="js/features/plus-menu.js?v=4.1.9"></script>
+<script src="js/modules/map/map-tools.js?v=4.1.9"></script>
+<script src="js/features/tool-layout.js?v=4.1.9"></script>
+
+<script src="js/features/settings.js?v=4.1.9"></script>
+<script src="js/features/production-hardening.js?v=4.1.9"></script>
+<script src="js/features/corrections.js?v=4.1.9"></script>
+<script src="js/data/importers.js?v=4.1.9"></script>
+<script src="js/features/raw-data-inspector.js?v=4.1.9"></script>
+<script src="js/ui/display-settings.js?v=4.1.9"></script>
+<script src="js/data/asset-fields.js?v=4.1.9"></script>
+<script src="js/modules/editor/asset-editor.js?v=4.1.9"></script>
+<script src="js/main.js?v=4.1.9"></script>
+<script src="js/modules/auth/pin-lock.js?v=4.1.9"></script>
+<script src="js/features/field-map-final-v418.js?v=4.1.9"></script>
+
+<script src="js/features/pwa-install-helper-v415.js?v=4.1.9"></script>
+<script>
+(function(){
+  window.FIELD_MAP_BUILD = '4.1.8-clean-upload';
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+        .then(function(reg){ window.FIELD_MAP_SW_READY = true; try{console.info('Field MAP service worker ready', reg.scope);}catch(e){} })
+        .catch(function(err){ try{console.warn('Field MAP service worker registration failed:', err);}catch(e){} });
+    });
+  }
+})();
+</script>
+</body></html>
