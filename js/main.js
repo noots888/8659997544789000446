@@ -180,7 +180,7 @@ init();
     startGpsFallback('Calibration check');
     calibrationRunning=true;
     headingSamples=[];
-    setCalibrationStatus('Calibrating 0% — hold phone flat, keep away from steel, then move in a slow figure-8.','checking');
+    setCalibrationStatus('Calibrating 0% — hold phone flat, keep away from steel, then slowly turn the phone left/right once.','checking');
     const btn=document.getElementById('bigCompassCalibrateBtn');
     if(btn) btn.disabled=true;
     let ticks=0;
@@ -188,7 +188,7 @@ init();
       ticks++;
       const pct=Math.min(100,Math.round((ticks/8)*100));
       const count=headingSamples.length;
-      setCalibrationStatus('Calibrating '+pct+'% — slow figure-8, then turn left/right once. Samples '+count+'.','checking');
+      setCalibrationStatus('Calibrating '+pct+'% — slow left/right turn. Keep the phone flat. Samples '+count+'.','checking');
       if(ticks>=8){
         clearInterval(timer);
         calibrationRunning=false;
@@ -201,7 +201,7 @@ init();
         }
         let msg='Done. Compass signal found. ';
         let tone='ok';
-        if(st.spread>45){ msg+='Unstable. Move away from vehicle steel/power hardware and redo the figure-8.'; tone='bad'; }
+        if(st.spread>45){ msg+='Unstable. Move away from vehicle steel/power hardware and redo the simple left/right check.'; tone='bad'; }
         else if(st.spread>22){ msg+='Slight drift. Good enough for rough bearing, but recheck away from metal.'; tone='warn'; }
         else { msg+='Stable enough.'; }
         if(lastGpsHeading!==null && lastDeviceHeading!==null){
@@ -236,7 +236,7 @@ init();
         </div>
         <div class="big-compass-readout"><b id="bigCompassDeg">000°</b><span id="bigCompassDir">N</span></div>
         <button class="big-compass-cal-btn" id="bigCompassCalibrateBtn" type="button">Calibrate / check compass</button>
-        <div class="big-compass-cal-steps"><b>Quick calibration:</b> phone flat → slow figure-8 → turn left/right once.</div>
+        <div class="big-compass-cal-steps"><b>Quick calibration:</b> phone flat → step away from ute steel → slow left/right turn once.</div>
         <div class="big-compass-cal-status" id="bigCompassCalibrationStatus">Tap Calibrate if the bearing seems off. Keep away from ute steel, magnets and hardware.</div>
         <div class="big-compass-hint">GPS heading is used as fallback when moving.</div>
       </div>`;
