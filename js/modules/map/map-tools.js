@@ -5,11 +5,28 @@
   Search keyboard/menu code should not be edited here unless changing map tools directly.
 */
 /* Measure tool, multi-measure, satellite, radius, crossings, breadcrumb trail. */
-function mapClick(e){if(document.getElementById("plusSheet").classList.contains("open")&&!measureOn&&!multiMeasureOn){closePlus();return}if(!measureOn&&!multiMeasureOn)return;let point=e.latlng;if(measureLock){let snap=findNearestLoadedAsset(point,70);if(snap)point=snap}if(multiMeasureOn){measurePts.push(point);L.marker(point,{icon:L.divIcon({className:"measure-poly-point"})}).addTo(measureLayer);if(multiMeasureLine)map.removeLayer(multiMeasureLine);if(measurePts.length>1){multiMeasureLine=L.polyline(measurePts,{color:"#e6aa34",weight:4}).addTo(map);let total=0;for(let i=1;i<measurePts.length;i++)total+=map.distance(measurePts[i-1],measurePts[i]);showToolStatus("Multi measure: "+fmt(total))}return}measurePts.push(point);L.marker(point,{icon:L.divIcon({className:"measure-point"})}).addTo(measureLayer);if(measurePts.length===2){if(measureLine)map.removeLayer(measureLine);measureLine=L.polyline(measurePts,{color:"#ff8a24",weight:5}).addTo(map);let d=map.distance(measurePts[0],measurePts[1]);measureLayer.clearLayers();showToolStatus("Measured: "+fmt(d));measurePts=[]}}
+function mapClick(e){
+  const plus=document.getElementById("plusSheet");
+  if(plus&&plus.classList.contains("open")&&!measureOn&&!multiMeasureOn){closePlus();return;}
+  if(!measureOn&&!multiMeasureOn)return;
+  let point=e.latlng;
+  if(measureLock){const snap=findNearestLoadedAsset(point,70); if(snap)point=snap;}
+  measurePts.push(point);
+  L.marker(point,{icon:L.divIcon({className:measurePts.length>2?"measure-poly-point":"measure-point"})}).addTo(measureLayer);
+  if(measureLine){try{measureLayer.removeLayer(measureLine);}catch(_){try{map.removeLayer(measureLine);}catch(e){}} measureLine=null;}
+  if(multiMeasureLine){try{measureLayer.removeLayer(multiMeasureLine);}catch(_){try{map.removeLayer(multiMeasureLine);}catch(e){}} multiMeasureLine=null;}
+  if(measurePts.length===1){showToolStatus("Measure: tap next point. Add more points for a path.");return;}
+  measureLine=L.polyline(measurePts,{color:measurePts.length>2?"#e6aa34":"#ff8a24",weight:5,opacity:.92}).addTo(measureLayer);
+  let total=0;
+  for(let i=1;i<measurePts.length;i++)total+=map.distance(measurePts[i-1],measurePts[i]);
+  const prefix=measurePts.length>2?"Multi measure":"Measured";
+  showToolStatus(prefix+": "+fmt(total)+(measurePts.length===2?". Tap more points to continue.":""));
+}
 function fmt(d){return d<1000?Math.round(d)+" m":(d/1000).toFixed(2)+" km"}
-function showToolStatus(t){let e=document.getElementById("toolStatus");e.innerText=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),3500)}
-function toggleMeasureTool(){measureOn=!measureOn;multiMeasureOn=false;measurePts=[];measureLayer.clearLayers();if(measureLine){map.removeLayer(measureLine);measureLine=null}if(multiMeasureLine){map.removeLayer(multiMeasureLine);multiMeasureLine=null}if(measureOn){measureLock=confirm("Lock measure points onto nearby assets?");showToolStatus("2 point measure on.")}else showToolStatus("Measure off"); if(typeof refreshToolActiveStates==='function')refreshToolActiveStates()}
-function toggleMultiMeasureTool(){multiMeasureOn=!multiMeasureOn;measureOn=false;measurePts=[];measureLayer.clearLayers();if(measureLine){map.removeLayer(measureLine);measureLine=null}if(multiMeasureLine){map.removeLayer(multiMeasureLine);multiMeasureLine=null}if(multiMeasureOn){measureLock=confirm("Lock measure points onto nearby assets?");showToolStatus("Multi measure on.")}else showToolStatus("Multi measure off"); if(typeof refreshToolActiveStates==='function')refreshToolActiveStates()}
+function showToolStatus(t){let e=document.getElementById("toolStatus");if(!e)return;e.innerText=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),3500)}
+function clearMeasureState(){measurePts=[];try{measureLayer.clearLayers();}catch(e){} if(measureLine){try{map.removeLayer(measureLine);}catch(e){} measureLine=null} if(multiMeasureLine){try{map.removeLayer(multiMeasureLine);}catch(e){} multiMeasureLine=null}}
+function toggleMeasureTool(){measureOn=!measureOn;multiMeasureOn=false;clearMeasureState();if(measureOn){measureLock=confirm("Lock measure points onto nearby assets?");showToolStatus("Measure on. Tap 2 points, or keep tapping for path measure.")}else showToolStatus("Measure off"); if(typeof refreshToolActiveStates==='function')refreshToolActiveStates(); if(typeof refreshMapControlState==='function')refreshMapControlState();}
+function toggleMultiMeasureTool(){if(!measureOn){toggleMeasureTool();return;} showToolStatus("Measure already supports multi-point paths.");}
 function findNearestLoadedAsset(latlng,maxM){let best=null,dist=Infinity;[assetLayer,crossingLayer,radiusLayer].forEach(layer=>layer.eachLayer(l=>{if(!l.getLatLng)return;let d=map.distance(latlng,l.getLatLng());if(d<dist){dist=d;best=l.getLatLng()}}));return dist<=maxM?best:null}
 function setBaseMapLayer(id){
   if(!map||!baseLayers)return;
