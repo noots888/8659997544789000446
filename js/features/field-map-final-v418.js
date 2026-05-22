@@ -246,7 +246,7 @@
   // Stable Map Controls layout: no overlapping, action IDs match labels.
   window.renderMapMenu=function renderMapMenu(){
     const controls=(typeof getToolLayoutControls==='function'?getToolLayoutControls():['viewArea','clear','filter','corrections','crossings','displayAll']);
-    const button=(a)=>`<button class="premium-action-card ${a.style}" data-action-id="${a.id}" ${['measure','multi','radius','breadcrumb','crossings','patrol'].includes(a.id)?`data-tool="${a.id}"`:''} onclick="runToolAction('${a.id}',event)"><i>${a.icon}</i><b>${a.label}</b><span${a.id==='crossings'?' id="lineCrossingsSub"':''}>${a.sub}</span></button>`;
+    const button=(a)=>`<button class="premium-action-card ${a.style}" data-action-id="${a.id}" ${['measure','breadcrumb','crossings','patrol'].includes(a.id)?`data-tool="${a.id}"`:''} onclick="runToolAction('${a.id}',event)"><i>${a.icon}</i><b>${a.label}</b><span${a.id==='crossings'?' id="lineCrossingsSub"':''}>${a.sub}</span></button>`;
     const actions=(typeof TOOL_ACTIONS!=='undefined'?TOOL_ACTIONS:[]);
     const html=controls.map(id=>actions.find(x=>x.id===id)).filter(Boolean).map(button).join('');
     head('Map','Controls');
@@ -830,7 +830,7 @@
 
   function buttonHTML(a){
     const subId=a.id==='crossings'?' id="lineCrossingsSub"':'';
-    const activeIds=['measure','multi','radius','breadcrumb','crossings','patrol'];
+    const activeIds=['measure','breadcrumb','crossings','patrol'];
     const dataTool=activeIds.includes(a.id)?` data-tool="${a.id}"`:'';
     return `<button type="button" class="premium-action-card ${a.style}" data-action-id="${a.id}"${dataTool} onclick="return runToolAction('${a.id}',event)"><i>${a.icon}</i><b>${escHTML(a.label)}</b><span${subId}>${escHTML(a.sub)}</span></button>`;
   }
@@ -871,7 +871,7 @@
     const controls=window.getToolLayoutControls();
     const tools=actions().filter(a=>!controls.includes(a.id));
     grid.innerHTML=tools.map(a=>{
-      const dataTool=['measure','multi','radius','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${a.id}"`:'';
+      const dataTool=['measure','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${a.id}"`:'';
       return `<button type="button" class="${a.toolClass||'green'} tool-btn"${dataTool} onclick="runToolAction('${a.id}',event);closePlus()"><span class="tool-emoji">${a.icon}</span>${escHTML(a.short||a.label)}</button>`;
     }).join('') || '<div class="tool-layout-empty">All quick buttons are in Map Controls.</div>';
     const title=document.querySelector('#plusSheet .plus-title');
@@ -1283,7 +1283,7 @@
         try{features=features.concat(await routeFetchOsmFeaturesForView(b,'powerNodes'));}catch(e){}
         try{features=features.concat(await routeFetchOsmFeaturesForView(b,'powerWays'));}catch(e){}
         let nodes=0,lines=0;
-        (features||[]).slice(0,1800).forEach(f=>{
+        (features||[]).slice(0,4200).forEach(f=>{
           if(!f||!Array.isArray(f.pts)||!f.pts.length)return;
           if(f.pts.length===1){
             const pt=f.pts[0];
@@ -1335,9 +1335,9 @@
   'use strict';
 
   const VERSION='3.9.8-public-power-json-crosscheck';
-  const MAX_JSON_MATCH_M_ACTIVE=140;
-  const MAX_JSON_MATCH_M_GENERAL=55;
-  const MAX_JSON_MATCH_M_OVERLAY=85;
+  const MAX_JSON_MATCH_M_ACTIVE=260;
+  const MAX_JSON_MATCH_M_GENERAL=140;
+  const MAX_JSON_MATCH_M_OVERLAY=180;
   const SOURCE_FLAG='public-power-json-crosscheck';
 
   function safeStatus(msg){try{showToolStatus?.(msg);}catch(e){}}
@@ -1675,7 +1675,7 @@
         try{features=features.concat(await routeFetchOsmFeaturesForView(b,'powerWays'));}catch(e){}
         annotateFeatures(features,{bounds:b,lines:activeRouteNames(),maxAny:MAX_JSON_MATCH_M_OVERLAY});
         let nodes=0,lines=0,matched=0;
-        (features||[]).slice(0,1800).forEach(f=>{
+        (features||[]).slice(0,4200).forEach(f=>{
           if(!f||!Array.isArray(f.pts)||!f.pts.length)return;
           const kind=String(f&&f.meta&&f.meta.kind||'public power');
           const match=f.__jsonMatch||f?.meta?.jsonMatch||null;
@@ -2219,11 +2219,11 @@
   const V401_MIGRATION_KEY='field_map_v401_split_auto_public_migrated';
   const CONTROL_MAX=6;
   const CONTROL_DEFAULT=['viewArea','clear','corrections','autoAlign','publicPowerCheck','crossings'];
-  const PUBLIC_MAX_MATCHED_POINTS=180;
-  const PUBLIC_MAX_MATCHED_LINES=80;
-  const PUBLIC_MAX_UNMATCHED_SAMPLE=24;
-  const PUBLIC_MATCH_ACTIVE_M=150;
-  const PUBLIC_MATCH_GENERAL_M=75;
+  const PUBLIC_MAX_MATCHED_POINTS=450;
+  const PUBLIC_MAX_MATCHED_LINES=180;
+  const PUBLIC_MAX_UNMATCHED_SAMPLE=220;
+  const PUBLIC_MATCH_ACTIVE_M=260;
+  const PUBLIC_MATCH_GENERAL_M=140;
 
   function status(msg){try{showToolStatus?.(msg);}catch(e){}}
   function html(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -2390,7 +2390,7 @@
   };
   function buttonHTML(a){
     const subId=a.id==='crossings'?' id="lineCrossingsSub"':'';
-    const activeIds=['measure','multi','radius','breadcrumb','crossings','patrol'];
+    const activeIds=['measure','breadcrumb','crossings','patrol'];
     const dataTool=activeIds.includes(a.id)?` data-tool="${a.id}"`:'';
     return `<button type="button" class="premium-action-card ${a.style}" data-action-id="${a.id}"${dataTool} onclick="return runToolAction('${a.id}',event)"><i>${a.icon}</i><b>${html(a.label)}</b><span${subId}>${html(a.sub)}</span></button>`;
   }
@@ -2407,7 +2407,7 @@
     const controls=window.getToolLayoutControls();
     const tools=actionList().filter(a=>!controls.includes(a.id));
     grid.innerHTML=tools.map(a=>{
-      const dataTool=['measure','multi','radius','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${a.id}"`:'';
+      const dataTool=['measure','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${a.id}"`:'';
       return `<button type="button" class="${a.toolClass||'green'} tool-btn"${dataTool} onclick="runToolAction('${a.id}',event);closePlus()"><span class="tool-emoji">${a.icon}</span>${html(a.short||a.label)}</button>`;
     }).join('') || '<div class="tool-layout-empty">All quick buttons are in Map Controls.</div>';
     const title=document.querySelector('#plusSheet .plus-title');
@@ -2589,9 +2589,7 @@
       let nodeCount=0,lineCount=0,unmatchedCount=0;
       Array.from(pointByAsset.values()).slice(0,PUBLIC_MAX_MATCHED_POINTS).forEach(item=>{if(drawPublicFeature(item.f,item.m))nodeCount++;});
       lineItems.slice(0,PUBLIC_MAX_MATCHED_LINES).forEach(item=>{if(drawPublicFeature(item.f,item.m))lineCount++;});
-      if(nodeCount+lineCount===0){
-        unmatched.slice(0,PUBLIC_MAX_UNMATCHED_SAMPLE).forEach(item=>{if(drawPublicFeature(item.f,null)){if(item.f.pts.length===1)nodeCount++; else lineCount++; unmatchedCount++;}});
-      }
+      unmatched.slice(0,PUBLIC_MAX_UNMATCHED_SAMPLE).forEach(item=>{if(drawPublicFeature(item.f,null)){if(item.f.pts.length===1)nodeCount++; else lineCount++; unmatchedCount++;}});
       try{window.fieldMapApplyCleanDotSystem?.();}catch(e){}
       const matchCount=pointByAsset.size+lineItems.length;
       const shown=nodeCount+lineCount;
@@ -2818,7 +2816,7 @@
 
   function buttonHTML(a){
     const subId=a.id==='crossings'?' id="lineCrossingsSub"':'';
-    const activeIds=['measure','multi','radius','breadcrumb','crossings','patrol'];
+    const activeIds=['measure','breadcrumb','crossings','patrol'];
     const dataTool=activeIds.includes(a.id)?` data-tool="${a.id}"`:'';
     return `<button type="button" class="premium-action-card ${a.style}" data-action-id="${a.id}"${dataTool} onclick="return runToolAction('${a.id}',event)"><i>${a.icon}</i><b>${html(a.label)}</b><span${subId}>${html(a.sub)}</span></button>`;
   }
@@ -2834,7 +2832,7 @@
     if(!grid)return;
     const controls=window.getToolLayoutControls();
     const tools=actionList().filter(a=>!controls.includes(a.id));
-    grid.innerHTML=tools.map(a=>{const dataTool=['measure','multi','radius','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${a.id}"`:'';return `<button type="button" class="${a.toolClass||'green'} tool-btn"${dataTool} onclick="runToolAction('${a.id}',event);closePlus()"><span class="tool-emoji">${a.icon}</span>${html(a.short||a.label)}</button>`;}).join('')||'<div class="tool-layout-empty">All quick buttons are in Map Controls.</div>';
+    grid.innerHTML=tools.map(a=>{const dataTool=['measure','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${a.id}"`:'';return `<button type="button" class="${a.toolClass||'green'} tool-btn"${dataTool} onclick="runToolAction('${a.id}',event);closePlus()"><span class="tool-emoji">${a.icon}</span>${html(a.short||a.label)}</button>`;}).join('')||'<div class="tool-layout-empty">All quick buttons are in Map Controls.</div>';
     const title=document.querySelector('#plusSheet .plus-title'); if(title)title.textContent='+ Map Tools';
     try{refreshCustomToolActiveStates?.();}catch(e){}
   };
@@ -3703,7 +3701,7 @@
 
   function mapButton(a){
     const subId=a.id==='crossings'?' id="lineCrossingsSub"':'';
-    const dataTool=['measure','multi','radius','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${a.id}"`:'';
+    const dataTool=['measure','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${a.id}"`:'';
     return `<button type="button" class="premium-action-card ${esc(a.style)}" data-action-id="${esc(a.id)}"${dataTool} onclick="return runToolAction('${esc(a.id)}',event)"><i>${esc(a.icon)}</i><b>${esc(a.label)}</b><span${subId}>${esc(a.sub)}</span></button>`;
   }
   window.renderMapMenu=function(){
@@ -3725,7 +3723,7 @@
     const controls=window.getToolLayoutControls();
     const tools=actions().filter(a=>!controls.includes(a.id));
     grid.innerHTML=tools.map(a=>{
-      const dataTool=['measure','multi','radius','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${a.id}"`:'';
+      const dataTool=['measure','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${a.id}"`:'';
       return `<button type="button" class="${esc(a.toolClass||'green')} tool-btn"${dataTool} onclick="runToolAction('${esc(a.id)}',event);closePlus?.()"><span class="tool-emoji">${esc(a.icon)}</span>${esc(a.short||a.label)}</button>`;
     }).join('') || '<div class="tool-layout-empty">All quick buttons are in Map Controls.</div>';
     const title=document.querySelector('#plusSheet .plus-title'); if(title)title.textContent='+ Map Tools';
@@ -3758,10 +3756,9 @@
       if(id==='crossings'){toggleLineCrossings?.();window.refreshMapControlState?.();return false;}
       if(id==='displayAll')return openDisplayAllMenu?.();
       if(id==='measure')return toggleMeasureTool?.();
-      if(id==='multi')return toggleMultiMeasureTool?.();
-      if(id==='radius')return toggleRadiusLines?.();
       if(id==='note')return openPOIAtGPS?.();
       if(id==='breadcrumb')return toggleBreadcrumbs?.();
+      if(id==='crumbtracks')return window.openCrumbtracks?.();
       if(id==='patrol')return togglePatrolOverlayFromMenu?.(ev||window.event);
     }catch(e){alert('Tool failed: '+(e.message||e));}
     return false;
@@ -3814,7 +3811,7 @@
 
   function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function status(msg){try{showToolStatus?.(String(msg||''));}catch(e){try{console.info('[Field MAP]',msg);}catch(_){}}}
-  function normalId(id){id=String(id||''); if(id==='autoCorrection')return 'autoAlign'; if(id==='poi')return 'note'; if(id==='area')return 'radius'; if(id==='field')return 'patrol'; return id;}
+  function normalId(id){id=String(id||''); if(id==='autoCorrection')return 'autoAlign'; if(id==='poi')return 'note'; if(id==='multi')return 'measure'; if(id==='radius'||id==='area')return 'viewArea'; if(id==='field')return 'patrol'; return id;}
   function actions(){
     return [
       {id:'viewArea',label:'View Area',short:'View Area',sub:'Records in window',style:'primary',toolClass:'green',icon:'▣'},
@@ -3826,11 +3823,10 @@
       {id:'publicPowerCheck',label:'Public Power Check',short:'Public Power',sub:'Reference check only',style:'purple',toolClass:'purple',icon:'⌘'},
       {id:'crossings',label:'Crossings',short:'Crossings',sub:'Red crossing zones',style:'amber',toolClass:'sun',icon:'✕'},
       {id:'displayAll',label:'Display All',short:'Display All',sub:'Record groups',style:'danger',toolClass:'redbtn',icon:'☷'},
-      {id:'measure',label:'Measure',short:'Measure',sub:'Two point measure',style:'brown',toolClass:'brown',icon:'↔'},
-      {id:'multi',label:'Multi Measure',short:'Multi',sub:'Measure a path',style:'brown',toolClass:'brown',icon:'⌁'},
-      {id:'radius',label:'Proximity Check',short:'Proximity',sub:'Nearby points',style:'primary',toolClass:'green',icon:'◎'},
+      {id:'measure',label:'Measure',short:'Measure',sub:'2 point or path measure',style:'brown',toolClass:'brown',icon:'↔'},
       {id:'note',label:'Note',short:'Note',sub:'Save current GPS',style:'amber',toolClass:'sun',icon:'◆'},
-      {id:'breadcrumb',label:'Breadcrumb',short:'Breadcrumb',sub:'GPS trail',style:'teal',toolClass:'teal',icon:'⋯'},
+      {id:'breadcrumb',label:'Breadcrumb',short:'Breadcrumb',sub:'Record GPS trail',style:'teal',toolClass:'teal',icon:'⋯'},
+      {id:'crumbtracks',label:'Crumbtracks',short:'Crumbtracks',sub:'View / delete trails',style:'teal',toolClass:'teal',icon:'⋱'},
       {id:'patrol',label:'Patrol',short:'Patrol',sub:'GPS overlay',style:'primary',toolClass:'purple',icon:'⌖'}
     ];
   }
@@ -3867,7 +3863,7 @@
 
   function mapButton(a){
     const subId=a.id==='crossings'?' id="lineCrossingsSub"':'';
-    const dataTool=['measure','multi','radius','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${esc(a.id)}"`:'';
+    const dataTool=['measure','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${esc(a.id)}"`:'';
     return `<button type="button" class="premium-action-card ${esc(a.style)}" data-action-id="${esc(a.id)}"${dataTool} onclick="return runToolAction('${esc(a.id)}',event)"><i>${esc(a.icon)}</i><b>${esc(a.label)}</b><span${subId}>${esc(a.sub)}</span></button>`;
   }
   window.renderMapMenu=function(){
@@ -3887,7 +3883,7 @@
     const controls=window.getToolLayoutControls();
     const tools=actions().filter(a=>!controls.includes(a.id));
     grid.innerHTML=tools.map(a=>{
-      const dataTool=['measure','multi','radius','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${esc(a.id)}"`:'';
+      const dataTool=['measure','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${esc(a.id)}"`:'';
       return `<button type="button" class="${esc(a.toolClass||'green')} tool-btn"${dataTool} onclick="runToolAction('${esc(a.id)}',event);closePlus?.()"><span class="tool-emoji">${esc(a.icon)}</span>${esc(a.short||a.label)}</button>`;
     }).join('') || '<div class="tool-layout-empty">All quick buttons are in Map Controls.</div>';
     const title=document.querySelector('#plusSheet .plus-title'); if(title)title.textContent='+ Map Tools';
@@ -4064,10 +4060,9 @@
       if(id==='crossings'){toggleLineCrossings?.();window.refreshMapControlState?.();return false;}
       if(id==='displayAll')return openDisplayAllMenu?.();
       if(id==='measure')return toggleMeasureTool?.();
-      if(id==='multi')return toggleMultiMeasureTool?.();
-      if(id==='radius')return toggleRadiusLines?.();
       if(id==='note')return openPOIAtGPS?.();
       if(id==='breadcrumb')return toggleBreadcrumbs?.();
+      if(id==='crumbtracks')return window.openCrumbtracks?.();
       if(id==='patrol')return togglePatrolOverlayFromMenu?.(ev||window.event);
     }catch(e){alert('Tool failed: '+(e.message||e));}
     return false;
@@ -4134,7 +4129,7 @@
   function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function status(msg){try{showToolStatus?.(String(msg||''));}catch(e){try{console.info('[Field MAP]',msg);}catch(_){}}}
   function byId(id){return document.getElementById(id);}
-  function normalId(id){id=String(id||''); if(id==='autoCorrection')return 'autoAlign'; if(id==='poi')return 'note'; if(id==='area')return 'radius'; if(id==='field')return 'patrol'; return id;}
+  function normalId(id){id=String(id||''); if(id==='autoCorrection')return 'autoAlign'; if(id==='poi')return 'note'; if(id==='multi')return 'measure'; if(id==='radius'||id==='area')return 'viewArea'; if(id==='field')return 'patrol'; return id;}
   function actions(){
     return [
       {id:'viewArea',label:'Proximity Check',short:'Proximity',sub:'Records in current map',style:'primary',toolClass:'green',icon:'▣'},
@@ -4146,11 +4141,10 @@
       {id:'publicPowerCheck',label:'Public Power Check',short:'Public Power',sub:'Reference check only',style:'purple',toolClass:'purple',icon:'⌘'},
       {id:'crossings',label:'Crossings',short:'Crossings',sub:'Red crossing zones',style:'amber',toolClass:'sun',icon:'✕'},
       {id:'displayAll',label:'Display All',short:'Display All',sub:'Record groups',style:'danger',toolClass:'redbtn',icon:'☷'},
-      {id:'measure',label:'Measure',short:'Measure',sub:'Two point measure',style:'brown',toolClass:'brown',icon:'↔'},
-      {id:'multi',label:'Multi Measure',short:'Multi',sub:'Measure a path',style:'brown',toolClass:'brown',icon:'⌁'},
-      {id:'radius',label:'3 km Radius',short:'3 km',sub:'Nearby points',style:'primary',toolClass:'green',icon:'◎'},
+      {id:'measure',label:'Measure',short:'Measure',sub:'2 point or path measure',style:'brown',toolClass:'brown',icon:'↔'},
       {id:'note',label:'Note',short:'Note',sub:'Save current GPS',style:'amber',toolClass:'sun',icon:'◆'},
-      {id:'breadcrumb',label:'Breadcrumb',short:'Breadcrumb',sub:'GPS trail',style:'teal',toolClass:'teal',icon:'⋯'},
+      {id:'breadcrumb',label:'Breadcrumb',short:'Breadcrumb',sub:'Record GPS trail',style:'teal',toolClass:'teal',icon:'⋯'},
+      {id:'crumbtracks',label:'Crumbtracks',short:'Crumbtracks',sub:'View / delete trails',style:'teal',toolClass:'teal',icon:'⋱'},
       {id:'patrol',label:'Patrol',short:'Patrol',sub:'GPS overlay',style:'primary',toolClass:'purple',icon:'⌖'}
     ];
   }
@@ -4244,7 +4238,7 @@
   };
   function mapButton(a){
     const subId=a.id==='crossings'?' id="lineCrossingsSub"':'';
-    const dataTool=['measure','multi','radius','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${esc(a.id)}"`:'';
+    const dataTool=['measure','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${esc(a.id)}"`:'';
     return `<button type="button" class="premium-action-card ${esc(a.style)}" data-action-id="${esc(a.id)}"${dataTool} onclick="return runToolAction('${esc(a.id)}',event)"><i>${esc(a.icon)}</i><b>${esc(a.label)}</b><span${subId}>${esc(a.sub)}</span></button>`;
   }
   window.renderMapMenu=function(){
@@ -4264,7 +4258,7 @@
     const controls=window.getToolLayoutControls();
     const tools=actions().filter(a=>!controls.includes(a.id));
     grid.innerHTML=tools.map(a=>{
-      const dataTool=['measure','multi','radius','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${esc(a.id)}"`:'';
+      const dataTool=['measure','breadcrumb','crossings','patrol'].includes(a.id)?` data-tool="${esc(a.id)}"`:'';
       return `<button type="button" class="${esc(a.toolClass||'green')} tool-btn"${dataTool} onclick="runToolAction('${esc(a.id)}',event);closePlus?.()"><span class="tool-emoji">${esc(a.icon)}</span>${esc(a.short||a.label)}</button>`;
     }).join('') || '<div class="tool-layout-empty">All quick buttons are in Map Controls.</div>';
     const title=document.querySelector('#plusSheet .plus-title'); if(title)title.textContent='+ Map Tools';
@@ -4274,9 +4268,7 @@
     id=normalId(id);
     try{
       if(id==='measure')return !!((typeof measureOn!=='undefined'&&measureOn)||window.measureOn);
-      if(id==='multi')return !!((typeof multiMeasureOn!=='undefined'&&multiMeasureOn)||window.multiMeasureOn);
-      if(id==='radius')return !!((typeof radiusOn!=='undefined'&&radiusOn)||window.radiusOn);
-      if(id==='breadcrumb')return !!((typeof breadcrumbOn!=='undefined'&&breadcrumbOn)||window.breadcrumbOn);
+            if(id==='breadcrumb')return !!((typeof breadcrumbOn!=='undefined'&&breadcrumbOn)||window.breadcrumbOn);
       if(id==='crossings')return !!((typeof crossingsEnabled!=='undefined'&&crossingsEnabled)||window.crossingsEnabled);
       if(id==='patrol')return !!byId('heliPage')?.classList.contains('open');
     }catch(e){}
@@ -4313,10 +4305,9 @@
       if(id==='crossings'){toggleLineCrossings?.();window.refreshMapControlState?.();return false;}
       if(id==='displayAll')return openDisplayAllMenu?.();
       if(id==='measure')return toggleMeasureTool?.();
-      if(id==='multi')return toggleMultiMeasureTool?.();
-      if(id==='radius')return toggleRadiusLines?.();
       if(id==='note')return openPOIAtGPS?.();
       if(id==='breadcrumb')return toggleBreadcrumbs?.();
+      if(id==='crumbtracks')return window.openCrumbtracks?.();
       if(id==='patrol')return togglePatrolOverlayFromMenu?.(ev||window.event);
     }catch(e){alert('Tool failed: '+(e.message||e));}
     return false;
@@ -4588,3 +4579,130 @@
   setTimeout(init,500); setTimeout(init,1600); setTimeout(()=>{injectFilterSourceControls();applySourceHudVisibility();},2400);
 })();
 
+/* ---- Field MAP v4.1.10 user requested field fixes ---- */
+(function(){
+  'use strict';
+  const VERSION='4.1.11-user-field-fixes-compass-repair';
+  const BREADCRUMB_KEY='field_map_breadcrumb_points_v1';
+  function status(msg){try{showToolStatus?.(String(msg||''));}catch(e){try{console.info('[Field MAP]',msg);}catch(_){}}}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function readCrumbs(){try{const a=JSON.parse(localStorage.getItem(BREADCRUMB_KEY)||'[]');return Array.isArray(a)?a.filter(p=>Array.isArray(p)&&Number.isFinite(Number(p[0]))&&Number.isFinite(Number(p[1]))):[];}catch(e){return [];}}
+  function saveCrumbs(points){try{localStorage.setItem(BREADCRUMB_KEY,JSON.stringify(points||[]));}catch(e){}}
+  function ensureCrumbtracksSheet(){
+    let sheet=document.getElementById('crumbtracksSheet');
+    if(!sheet){sheet=document.createElement('div');sheet.id='crumbtracksSheet';sheet.className='crumbtracks-sheet';document.body.appendChild(sheet);}
+    return sheet;
+  }
+  function clearTrailLayer(){try{breadcrumbLayer?.clearLayers?.();}catch(e){}}
+  window.viewSavedCrumbtracks=function(){
+    const pts=readCrumbs();
+    if(!pts.length){status('No saved crumbtracks.');return;}
+    try{closeDrawer?.();closePlus?.();closeSettings?.();document.getElementById('crumbtracksSheet')?.classList.remove('show');}catch(e){}
+    if(!breadcrumbLayer&&typeof L!=='undefined')try{breadcrumbLayer=L.layerGroup().addTo(map);}catch(e){}
+    clearTrailLayer();
+    pts.forEach(p=>{try{registerMapToggleLayer(L.circleMarker([Number(p[0]),Number(p[1])],{radius:3,weight:1,color:'#e9ad35',fillColor:'#fff1a8',fillOpacity:.88,opacity:.9}).addTo(breadcrumbLayer),null,'breadcrumb');}catch(e){}});
+    if(pts.length>1){try{registerMapToggleLayer(L.polyline(pts.map(p=>[Number(p[0]),Number(p[1])]),{color:'#e9ad35',weight:4,opacity:.92}).addTo(breadcrumbLayer),null,'breadcrumb');}catch(e){}}
+    try{map.fitBounds(L.latLngBounds(pts.map(p=>[Number(p[0]),Number(p[1])])).pad(.18));}catch(e){}
+    try{applyMapToggleSettings?.();}catch(e){}
+    status('Crumbtrack loaded: '+pts.length.toLocaleString()+' points.');
+  };
+  window.deleteSavedCrumbtracks=function(){
+    const pts=readCrumbs();
+    if(!pts.length){status('No crumbtracks to delete.');return;}
+    if(!confirm('Delete saved breadcrumb / crumbtrack history?'))return;
+    saveCrumbs([]);
+    try{breadcrumbPoints=[];window.breadcrumbPoints=[];}catch(e){}
+    clearTrailLayer();
+    window.openCrumbtracks?.();
+    status('Saved crumbtracks deleted.');
+  };
+  window.openCrumbtracks=function(){
+    try{closeDrawer?.();closePlus?.();closeSettings?.();}catch(e){}
+    const pts=readCrumbs();
+    const sheet=ensureCrumbtracksSheet();
+    const last=pts.length?new Date(Number(pts[pts.length-1][2])||Date.now()).toLocaleString():'';
+    sheet.innerHTML=`<div class="crumbtracks-card"><div class="crumbtracks-head"><div><b>Crumbtracks</b><span>${pts.length?`${pts.length.toLocaleString()} saved point${pts.length===1?'':'s'}${last?' · last '+esc(last):''}`:'No saved breadcrumb points'}</span></div><button type="button" onclick="document.getElementById('crumbtracksSheet')?.classList.remove('show')">×</button></div><div class="crumbtracks-actions"><button type="button" class="green" onclick="viewSavedCrumbtracks()" ${pts.length?'':'disabled'}>View saved trail</button><button type="button" onclick="toggleBreadcrumbs?.();openCrumbtracks()">${(typeof breadcrumbOn!=='undefined'&&breadcrumbOn)?'Stop recording':'Start recording'}</button><button type="button" class="danger" onclick="deleteSavedCrumbtracks()" ${pts.length?'':'disabled'}>Delete crumbtracks</button></div><div class="help">Breadcrumb records are local only. View loads the saved trail back onto the map; Delete clears the saved local track.</div></div>`;
+    sheet.classList.add('show');
+  };
+
+  // Make GPS tracking a locked follow mode. Locate starts/holds tracking; map drag/zoom no longer cancels it.
+  let watchId=null,lastGps=null,gpsActive=false;
+  function setGpsUi(on){
+    gpsActive=!!on;
+    try{document.body.classList.toggle('gps-follow-active',gpsActive);}catch(e){}
+    try{document.querySelectorAll('[onclick*="locateMe"],.gps-btn,.locate-btn').forEach(b=>b.classList.toggle('active',gpsActive));}catch(e){}
+  }
+  function updateGpsMarker(p,snap){
+    const c=p&&p.coords;if(!c)return;
+    const lat=Number(c.latitude),lng=Number(c.longitude);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
+    lastGps=[lat,lng];
+    try{
+      if(locMarker&&locMarker.setLatLng){locMarker.setLatLng(lastGps);} else if(typeof L!=='undefined'&&map){locMarker=registerMapToggleLayer(L.marker(lastGps,{icon:L.divIcon({className:'loc-marker gps-arrow-marker'})}).addTo(map),null,'location');}
+      if(locMarker){locMarker._gps=lastGps;locMarker._accuracy=Number(c.accuracy)||null;locMarker._heading=Number(c.heading)||null;locMarker._fieldMapGpsArrow=true;}
+      const heading=Number(c.heading); if(Number.isFinite(heading))document.documentElement.style.setProperty('--gps-heading',heading+'deg');
+      if(snap!==false&&map){const z=Math.max(17,Number(map.getZoom&&map.getZoom())||17);map.setView(lastGps,z,{animate:false});}
+    }catch(e){}
+  }
+  window.startGpsTracking=function(){
+    if(!navigator.geolocation){alert('GPS unavailable.');return false;}
+    if(watchId!==null){setGpsUi(true); if(lastGps&&map)try{map.setView(lastGps,Math.max(17,map.getZoom()),{animate:false});}catch(e){} status('GPS tracking locked.'); return true;}
+    setGpsUi(true); status('GPS tracking locked.');
+    watchId=navigator.geolocation.watchPosition(p=>updateGpsMarker(p,true),e=>{status('GPS failed: '+(e&&e.message||e));setGpsUi(false);},{enableHighAccuracy:true,maximumAge:1000,timeout:15000});
+    return true;
+  };
+  window.stopGpsTracking=function(reason){
+    if(reason==='force'||reason==='clear'){
+      if(watchId!==null){try{navigator.geolocation.clearWatch(watchId);}catch(e){} watchId=null;}
+      setGpsUi(false); status('GPS tracking stopped.'); return;
+    }
+    setGpsUi(true); if(lastGps&&map)try{map.setView(lastGps,Math.max(17,map.getZoom()),{animate:false});}catch(e){} status('GPS tracking stays locked.');
+  };
+  window.locateMe=function(){return window.startGpsTracking();};
+
+  // Force estimate dots visible when opened from search / route list.
+  function forceEstimateToggles(){
+    try{mapToggleSettings=mapToggleSettings||{};mapToggleSettings.dots=true;mapToggleSettings.noGpsEstimates=true;mapToggleSettings.gapEstimates=true;localStorage.setItem('fieldMap.mapToggles.v1',JSON.stringify(mapToggleSettings));applyMapToggleSettings?.();}catch(e){}
+  }
+  const oldShowLine=window.showLineOnMap;
+  if(typeof oldShowLine==='function'&&!oldShowLine.__v410Wrapped){
+    const fn=function(){const r=oldShowLine.apply(this,arguments);setTimeout(forceEstimateToggles,80);return r;};
+    fn.__v410Wrapped=true;window.showLineOnMap=fn;
+  }
+  const oldShowRoutes=window.showRoutesOnMap;
+  if(typeof oldShowRoutes==='function'&&!oldShowRoutes.__v410Wrapped){
+    const fn=function(){const r=oldShowRoutes.apply(this,arguments);setTimeout(forceEstimateToggles,120);return r;};
+    fn.__v410Wrapped=true;window.showRoutesOnMap=fn;
+  }
+  function compact(s){try{return compactSearch(s);}catch(e){return String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');}}
+  function focusVirtual(line,plate,tries){
+    try{
+      const target='V:'+compact(line)+':'+String(Number(plate));
+      let marker=null;
+      if(routeEstimateMarkerByKey&&routeEstimateMarkerByKey.get)marker=routeEstimateMarkerByKey.get(target);
+      if(!marker&&routeEstimateMarkerByKey&&routeEstimateMarkerByKey.forEach){routeEstimateMarkerByKey.forEach((m,k)=>{if(!marker&&String(k).endsWith(':'+String(Number(plate))))marker=m;});}
+      if(marker&&marker.getLatLng){const ll=marker.getLatLng();map.setView(ll,18,{animate:false});marker.openPopup&&marker.openPopup();return true;}
+    }catch(e){}
+    if((tries||0)<35)setTimeout(()=>focusVirtual(line,plate,(tries||0)+1),180);
+    return false;
+  }
+  const oldVirtual=window.assetIndexShowVirtualEstimate;
+  window.assetIndexShowVirtualEstimate=function(line,plate){
+    try{closeAssetIndex?.();setActive?.('tabMap');forceEstimateToggles();}catch(e){}
+    try{showLineOnMap(routeHitsFromCache(line),line);}catch(e){try{oldVirtual&&oldVirtual.apply(this,arguments);}catch(_){}}
+    status('Loading route estimate dot on map...');
+    setTimeout(()=>focusVirtual(line,plate,0),450);
+  };
+
+  // Compass stays as bar compass only; no maximise overlay.
+  function patchCompass(){
+    try{document.querySelectorAll('.big-compass-overlay,#bigCompassOverlay').forEach(el=>el.remove());}catch(e){}
+    try{const c=document.querySelector('.compass'); if(c){c.classList.add('bar-compass'); c.removeAttribute('onclick'); c.onclick=null;}}catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patchCompass,{once:true}); else patchCompass();
+  setTimeout(()=>{try{window.renderCustomPlusGrid?.();window.refreshCustomToolActiveStates?.();}catch(e){}},250);
+  window.FIELD_MAP_VERSION=VERSION;
+})();
+
+
+/* Field MAP v4.1.11 compass repair marker */
+(function(){try{window.FIELD_MAP_VERSION='4.1.11-bar-compass-repair';}catch(e){}})();

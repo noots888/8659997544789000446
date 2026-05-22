@@ -1,6 +1,6 @@
 /* Clean no-freeze mobile search engine. Direct search over normalised imported records. */
 // searchFilters is declared once in core/state.js. Assign only, do not redeclare, or the Search tab breaks.
-searchFilters={line:true,poles:true,substations:true,depots:true,conductors:false};
+searchFilters={line:true,poles:false,substations:false,depots:false,conductors:false,addresses:false};
 let searchDetailOpen=false;
 let assetIndexSelectedRoutes=new Map();
 function openAssetIndex(){
@@ -88,12 +88,13 @@ function renderSearch(){
       <button class="typing-search-btn index-search-only-btn" onclick="runSearch()">Search</button>
     </div>
     ${assetIndexSelectedRoutesHTML()}
-    <div class="index-hint">Tip: route-only search shows routes only. Turn on Points/Structures, Sites, or Bases when you want individual assets.</div>
+    <div class="index-hint">Tip: route-only search is the default. Turn on Points/Structures, Sites, Bases, or Address only when needed.</div>
     <div class="search-filter-tabs search-filter-tabs-mobile index-filter-tabs">
       <button id="sfLine" onclick="toggleSearchFilter('line')">Routes</button>
       <button id="sfPoles" onclick="toggleSearchFilter('poles')">Points/Structures</button>
       <button id="sfSubs" onclick="toggleSearchFilter('substations')">Sites</button>
       <button id="sfDepots" onclick="toggleSearchFilter('depots')">Bases</button>
+      <button id="sfAddress" onclick="toggleSearchFilter('addresses')">Address</button>
     </div>
     <div id="resultsBox" class="search-results asset-index-results has-scroll-indicator"><div class="help">Type then press Search. Nothing is loaded onto the map until you press Show on map.</div></div>`;
   applySearchFilterUI();
@@ -153,7 +154,7 @@ function wireNativeSearchKeyboard(){
 }
 
 function toggleSearchFilter(name){searchFilters[name]=!searchFilters[name]; if(!Object.values(searchFilters).some(Boolean))searchFilters[name]=true; applySearchFilterUI(); runSearch();}
-function applySearchFilterUI(){const map={sfLine:'line',sfPoles:'poles',sfSubs:'substations',sfDepots:'depots'};Object.entries(map).forEach(([id,k])=>{const b=document.getElementById(id);if(b)b.classList.toggle('active',!!searchFilters[k])})}
+function applySearchFilterUI(){const map={sfLine:'line',sfPoles:'poles',sfSubs:'substations',sfDepots:'depots',sfAddress:'addresses'};Object.entries(map).forEach(([id,k])=>{const b=document.getElementById(id);if(b)b.classList.toggle('active',!!searchFilters[k])})}
 function clearSearchResultsWhileTyping(){
   // Mobile performance: do not search/reload assets on every keypress.
   // Results only refresh when the orange search button is pressed or Enter is tapped.
@@ -207,7 +208,30 @@ function looseCodeMatch(r,q,qc){
   return false;
 }
 function matchesQuery(r,q,qc){const hay=recordHay(r), hc=r.__compact||compactSearch(hay); if(!q)return true; const words=q.split(' ').filter(Boolean); return hay.includes(q)||hc.includes(qc)||words.every(w=>hay.includes(w)||hc.includes(compactSearch(w)))||looseCodeMatch(r,q,qc);}
-function searchAssetFiltersEnabled(){return !!(searchFilters.poles||searchFilters.substations||searchFilters.depots||searchFilters.conductors)}
+const SEARCH_ADDRESS_FIELDS=['ADDRESS','STREET_ADDRESS','SITE_ADDRESS','LOCATION_ADDRESS','ROAD_ADDRESS','FULL_ADDRESS','PROPERTY_ADDRESS','DEPOT_ADDRESS','SUBSTATION_ADDRESS','LOCATION','ROAD','STREET','STREET_NAME','SUBURB','TOWN','LOCALITY','POSTCODE','POST_CODE','CITY'];
+function recordAddressText(r){
+  const vals=[];
+  const add=v=>{if(v!==undefined&&v!==null&&String(v).trim())vals.push(String(v));};
+  try{add(val(r,SEARCH_ADDRESS_FIELDS));}catch(e){}
+  try{SEARCH_ADDRESS_FIELDS.forEach(k=>add(r&&r[k]));}catch(e){}
+  try{if(r&&r.properties)SEARCH_ADDRESS_FIELDS.forEach(k=>add(r.properties[k]));}catch(e){}
+  return vals.join(' ');
+}
+function addressEntryMatches(e,qi){
+  if(!qi||!qi.q)return false;
+  const text=normSearch(recordAddressText(e&&e.record));
+  if(!text)return false;
+  const compact=compactSearch(text);
+  return text.includes(qi.q)||compact.includes(qi.qc)||(qi.words&&qi.words.length&&qi.words.every((w,i)=>text.includes(w)||compact.includes(qi.wordCompacts[i])));
+}
+function scoreAddressEntry(e,qi){
+  const text=normSearch(recordAddressText(e&&e.record));
+  const compact=compactSearch(text);
+  if(compact===qi.qc||text===qi.q)return 0;
+  if(compact.startsWith(qi.qc)||text.startsWith(qi.q))return 1;
+  return 3;
+}
+function searchAssetFiltersEnabled(){return !!(searchFilters.poles||searchFilters.substations||searchFilters.depots||searchFilters.conductors||searchFilters.addresses)}
 function resultKindAllowed(r){
   const k=String(r.__kind||getType(r)||'asset').toLowerCase();
   if(k.includes('conductor')||k.includes('detail'))return !!searchFilters.conductors;
@@ -336,7 +360,7 @@ async function runSearch(){
     box.innerHTML=`<div class="help">Searching… 0 / ${Number(total||0).toLocaleString()}</div>`;
     for(let n=0;n<total;n++){
       const e=idx[n];
-      if(entryKindAllowed(e)&&entryMatches(e,qi))results.push({kind:'asset',score:scoreEntry(e,qi),row:e.record,index:e.i});
+      {const addressHit=!!(searchFilters.addresses&&addressEntryMatches(e,qi)); if((entryKindAllowed(e)&&entryMatches(e,qi))||addressHit)results.push({kind:'asset',score:addressHit?scoreAddressEntry(e,qi):scoreEntry(e,qi),row:e.record,index:e.i});}
       if(n%700===0){
         if(runId!==__searchRunId)return;
         box.innerHTML=`<div class="help">Searching… ${Number(n||0).toLocaleString()} / ${Number(total||0).toLocaleString()}</div>`;
@@ -1295,7 +1319,7 @@ function routeEnhanceOsmPowerFeatures(features){
     if(!isPower||!Array.isArray(f.pts)||f.pts.length<2)return;
     f.pts.forEach((pt,idx)=>{
       // Keep all vertices for smaller ways; for very large ways keep enough vertices without flooding the phone.
-      if(f.pts.length<=260 || idx===0 || idx===f.pts.length-1 || idx%2===0) addVertex(pt,'powerVertex');
+      addVertex(pt,'powerVertex');
     });
   });
   const nodes=base.concat(extra)
