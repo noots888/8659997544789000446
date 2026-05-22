@@ -6936,3 +6936,157 @@ body.field-map-fullscreen-active.field-map-keep-screen-on::before{display:none!i
 .pwa-install-actions button:nth-child(2){background:#122418;}
 .pwa-install-actions button:nth-child(3){background:#eef3f0;color:#122418;box-shadow:none;}
 @media (display-mode: standalone){.pwa-install-helper{display:none!important;}}
+
+/* Field MAP v4.1.10 user requested field fixes */
+.tool-status.on,
+.tool-status{
+  top:auto!important;
+  bottom:calc(76px + env(safe-area-inset-bottom))!important;
+  left:12px!important;
+  right:12px!important;
+  z-index:99970!important;
+}
+.auto-align-status{
+  top:auto!important;
+  bottom:calc(76px + env(safe-area-inset-bottom))!important;
+  z-index:99960!important;
+  pointer-events:auto!important;
+}
+.auto-align-status.show{display:block!important;}
+.auto-align-status.cancellable{padding-bottom:12px!important;}
+body.field-map-keep-screen-on::before,
+body.field-map-keep-screen-on::after,
+.keep-screen-on-bar,
+#keepScreenOnBar,
+.screen-on-bar,
+#screenOnBar{display:none!important;content:none!important;}
+/* Hide only the visual status bar in Display & Power, not the wake-lock setting itself. */
+.power-status{display:none!important;}
+.big-compass-overlay,
+#bigCompassOverlay,
+.big-compass-card{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+.compass,
+.compass.bar-compass{
+  cursor:default!important;
+  pointer-events:none!important;
+  position:fixed!important;
+  left:50%!important;
+  right:auto!important;
+  top:calc(12px + env(safe-area-inset-top))!important;
+  transform:translateX(-50%)!important;
+  width:min(250px,44vw)!important;
+  height:34px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:10px!important;
+  padding:0 12px!important;
+  background:linear-gradient(180deg,rgba(19,36,25,.96),rgba(7,16,10,.96))!important;
+  border:1px solid rgba(255,248,232,.32)!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.30)!important;
+  overflow:hidden!important;
+}
+.compass:before,
+.compass.bar-compass:before{
+  content:"▲"!important;
+  position:static!important;
+  color:#ef4c3b!important;
+  font-size:14px!important;
+  line-height:1!important;
+  transform:rotate(calc(-1 * var(--small-compass-heading,0deg)))!important;
+}
+.compass:after,
+.compass.bar-compass:after{display:none!important;content:none!important;}
+.compass b,
+.compass.bar-compass b{
+  margin:0!important;
+  font-size:14px!important;
+  letter-spacing:.18em!important;
+  color:#fff8e8!important;
+}
+.compass b:after{content:"  E  S  W";opacity:.72;font-size:11px;letter-spacing:.12em;margin-left:10px;}
+.loc-marker.gps-arrow-marker,
+.loc-marker{
+  width:28px!important;height:28px!important;border-radius:50%!important;
+  background:rgba(34,122,232,.16)!important;border:2px solid rgba(34,122,232,.85)!important;
+  box-shadow:0 0 0 7px rgba(34,122,232,.16),0 4px 14px rgba(0,0,0,.24)!important;
+}
+.loc-marker:after{
+  content:"▲"!important;position:absolute!important;left:50%!important;top:50%!important;
+  transform:translate(-50%,-58%) rotate(var(--gps-heading,0deg))!important;
+  color:#0f66e8!important;font-size:18px!important;line-height:1!important;text-shadow:0 1px 2px #fff!important;
+}
+.crumbtracks-sheet{
+  position:fixed;z-index:99980;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));
+  display:none;
+}
+.crumbtracks-sheet.show{display:block;}
+.crumbtracks-card{
+  background:rgba(255,248,232,.98);border:1px solid rgba(255,255,255,.58);border-radius:22px;
+  box-shadow:0 -12px 36px rgba(0,0,0,.32);padding:12px;color:#1d2d1e;
+}
+.crumbtracks-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.crumbtracks-head b{display:block;font-size:18px;font-weight:950;}
+.crumbtracks-head span{display:block;font-size:12px;color:#64715b;font-weight:800;}
+.crumbtracks-head button{width:42px;height:42px;padding:0;border-radius:15px;background:#dfd4b9;color:#1d2d1e;box-shadow:none;font-size:25px;}
+.crumbtracks-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.crumbtracks-actions button{min-height:44px;}
+.crumbtracks-actions .danger{background:linear-gradient(135deg,#a92e24,#681a15)!important;}
+.crumbtracks-actions button:disabled{opacity:.45;filter:saturate(.6);}
+@media(max-width:420px){.crumbtracks-actions{grid-template-columns:1fr}.compass,.compass.bar-compass{width:168px!important;}}
+
+/* Field MAP v4.1.11 bar compass repair */
+.compass.live-bar-compass,
+.compass.bar-compass.live-bar-compass{
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  left:50%!important;
+  right:auto!important;
+  top:calc(12px + env(safe-area-inset-top))!important;
+  transform:translateX(-50%)!important;
+  width:min(300px,58vw)!important;
+  height:38px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  padding:0 10px!important;
+  touch-action:manipulation!important;
+  background:linear-gradient(180deg,rgba(23,55,34,.98),rgba(6,18,10,.98))!important;
+  border:1px solid rgba(255,248,232,.40)!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.10)!important;
+  overflow:hidden!important;
+  color:#fff8e8!important;
+}
+.compass.live-bar-compass:before,
+.compass.live-bar-compass:after{display:none!important;content:none!important;}
+.fm-compass-pointer{font-size:15px!important;color:#ef4c3b!important;line-height:1!important;transform:rotate(calc(-1 * var(--bar-compass-heading,0deg)))!important;transition:transform .16s linear!important;text-shadow:0 1px 3px rgba(0,0,0,.5)!important;}
+.compass.live-bar-compass .fm-compass-dir{font-size:15px!important;font-weight:950!important;letter-spacing:.08em!important;margin:0!important;min-width:34px!important;text-align:center!important;color:#fff8e8!important;}
+.compass.live-bar-compass .fm-compass-dir:after{display:none!important;content:none!important;}
+.fm-compass-deg{font-size:13px!important;font-weight:950!important;font-variant-numeric:tabular-nums!important;color:#f5dfab!important;min-width:38px!important;text-align:right!important;}
+.fm-compass-src{font-size:9px!important;font-weight:950!important;letter-spacing:.05em!important;border-radius:999px!important;padding:3px 5px!important;background:rgba(255,255,255,.12)!important;color:#d8e6d4!important;min-width:34px!important;text-align:center!important;}
+.compass.live-bar-compass.compass-device .fm-compass-src{background:rgba(58,143,202,.25)!important;color:#d9f0ff!important;}
+.compass.live-bar-compass.compass-gps .fm-compass-src{background:rgba(233,173,53,.24)!important;color:#ffe6aa!important;}
+.compass.live-bar-compass.compass-wait .fm-compass-src{background:rgba(197,104,46,.25)!important;color:#ffd7bd!important;}
+.bar-compass-panel{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:99992;display:none;pointer-events:none;}
+.bar-compass-panel.show{display:block;pointer-events:auto;}
+.bar-compass-card{background:rgba(255,248,232,.98);color:#142318;border:1px solid rgba(18,36,24,.18);border-radius:22px;box-shadow:0 18px 48px rgba(0,0,0,.36);padding:12px;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+.bar-compass-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.bar-compass-head b{font-size:16px;font-weight:950;}
+.bar-compass-head button{width:38px;height:38px;border-radius:14px;background:#e1d4b9!important;color:#142318!important;box-shadow:none!important;padding:0!important;font-size:24px!important;line-height:1!important;}
+.bar-compass-live{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.bar-compass-live span:first-child{font-size:25px;font-weight:950;font-variant-numeric:tabular-nums;color:#102316;}
+.bar-compass-live span:nth-child(2){font-size:18px;font-weight:950;border-radius:14px;background:#173d25;color:#fff8e8;padding:5px 9px;min-width:48px;text-align:center;}
+.bar-compass-live em{font-style:normal;font-size:10px;font-weight:950;border-radius:999px;background:#eef1e8;color:#354636;padding:5px 8px;}
+.bar-compass-help{font-size:12px;line-height:1.35;font-weight:800;color:#526047;background:#fbf1d9;border:1px solid #e1d1ad;border-radius:15px;padding:9px;margin-bottom:9px;}
+.bar-compass-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:8px;}
+.bar-compass-actions button{min-height:40px;border-radius:14px;padding:7px 5px!important;font-size:12px!important;font-weight:950!important;}
+.bar-compass-actions button:nth-child(2){background:linear-gradient(135deg,#c5682e,#7d3d1d)!important;}
+.bar-compass-actions button:nth-child(3){background:#e3d6bb!important;color:#142318!important;box-shadow:none!important;}
+.bar-compass-status{border-radius:15px;background:rgba(31,53,34,.07);color:#304834;border:1px solid rgba(31,53,34,.12);font-size:12px;font-weight:850;line-height:1.35;padding:9px;}
+.bar-compass-status.ok{background:rgba(47,106,54,.15);color:#1a5524;border-color:rgba(47,106,54,.25);}
+.bar-compass-status.warn{background:rgba(233,173,53,.16);color:#7a4d0a;border-color:rgba(233,173,53,.30);}
+.bar-compass-status.bad{background:rgba(183,65,46,.14);color:#862b20;border-color:rgba(183,65,46,.28);}
+@media(max-width:390px){.compass.live-bar-compass{width:min(270px,62vw)!important;gap:6px!important}.fm-compass-src{display:none!important}.bar-compass-actions{grid-template-columns:1fr}.bar-compass-actions button{min-height:42px!important;}}
